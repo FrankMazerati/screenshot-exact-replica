@@ -11,6 +11,10 @@
 - [ ] Dashboard: Bring the Work to You, Quick Picks, news, connector/NOC/security/KB cards
 - [ ] Login foundation (no fake auth)
 
+## Review checkpoint (before any more building)
+- [ ] Deliver for review: navigation tree, app structure, reusable code plan, backend inventory
+- No database tables until the user approves the review
+
 ## Phase 2+ (blocked on backend connection)
 - [ ] Connect existing Supabase project fzwbvccvqnbvzbqfgiep — BLOCKED: user connects via Settings → General → External Supabase
 - [ ] Database inventory + module mapping + safe plan

@@ -54,7 +54,7 @@ export function nextState(
   };
 }
 
-export function deriveHealth(recent: Array&lt;{ status: EventStatus }&gt;): ConnectionStatus {
+export function deriveHealth(recent: { status: EventStatus }[]): ConnectionStatus {
   if (recent.length === 0) return "not_connected";
   const bad = recent.filter((event) => event.status === "failed" || event.status === "dead").length;
   const ratio = bad / recent.length;
@@ -63,9 +63,9 @@ export function deriveHealth(recent: Array&lt;{ status: EventStatus }&gt;): Conn
 }
 
 export function dueEvents(
-  events: Array&lt;{ status: EventStatus; next_attempt_at: string }&gt;,
+  events: { status: EventStatus; next_attempt_at: string }[],
   now = Date.now(),
-): Array&lt;{ status: EventStatus; next_attempt_at: string }&gt; {
+): { status: EventStatus; next_attempt_at: string }[] {
   return events.filter(
     (event) =>
       (event.status === "pending" || event.status === "failed") &&
@@ -81,8 +81,8 @@ export function canEmit(roles: Role[], type: SyncEventType): boolean {
   return type.startsWith("ticket.");
 }
 
-export type SyncHandler = (event: SyncEvent) => Promise&lt;void&gt;;
-export const handlers = new Map&lt;string, SyncHandler&gt;();
+export type SyncHandler = (event: SyncEvent) => unknown;
+export const handlers: { [connectionId: string]: SyncHandler } = Object.create(null);
 export function registerHandler(connectionId: string, handler: SyncHandler): void {
-  handlers.set(connectionId, handler);
+  handlers[connectionId] = handler;
 }

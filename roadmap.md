@@ -1,21 +1,23 @@
 # Maximus Optimus Global Command Center — Roadmap
 
-## Phase 1 — Shell and navigation (in progress)
-- [ ] Brand design system (light blue / contractor purple / tenant green)
-- [ ] Global header, profile area, time bar, announcements
-- [ ] Ten-section hamburger menu with full nested navigation (data-driven)
-- [ ] Real route for every destination + page foundation with build status
-- [ ] Global search + ID search
-- [ ] Help Buddy launcher + persistent panel
-- [ ] AI Systems Bar
-- [ ] Dashboard: Bring the Work to You, Quick Picks, news, connector/NOC/security/KB cards
-- [ ] Login foundation (no fake auth)
+## Phase 1 — Shell and navigation
+- [x] Brand design system (light blue / contractor purple / tenant green)
+- [x] Global header, profile area, time bar, announcements
+- [x] Ten-section hamburger menu with full nested navigation (data-driven)
+- [x] Real route for every destination + page foundation with build status
+- [x] Global search + ID search
+- [x] Help Buddy launcher + persistent panel
+- [x] AI Systems Bar
+- [x] Dashboard: Bring the Work to You, Quick Picks, news, connector/NOC/security/KB cards
+- [x] Login foundation (no fake auth)
 
 ## Review checkpoint (before any more building)
-- [ ] Deliver for review: navigation tree, app structure, reusable code plan, backend inventory
+- [x] Deliver for review: navigation tree, app structure, reusable code plan (Files: Phase-1-Review.md)
+- [ ] Backend inventory — BLOCKED: existing project not yet connected
+- [ ] User approval of review — waiting on user
 - No database tables until the user approves the review
 
-## Phase 2+ (blocked on backend connection)
-- [ ] Connect existing Supabase project fzwbvccvqnbvzbqfgiep — BLOCKED: user connects via Settings → General → External Supabase
+## Phase 2+ (after approval)
+- [ ] Connect existing backend project fzwbvccvqnbvzbqfgiep — user connects via Settings → General → External Supabase
 - [ ] Database inventory + module mapping + safe plan
-- [ ] Reuse code from FrankMazerati GitHub repos (public, reachable)
+- [ ] Port IntelliDesk logic (screenshot-perfect) and IntelliSync engine (screenshot-match)

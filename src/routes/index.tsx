@@ -63,7 +63,8 @@ const QUICK_PICKS: Pick[] = [
 ];
 
 const DEFAULT_NEWS = ["IT", "Corporate", "Security", "Network", "Help Desk / Executive"];
-const WORK_TABS = ["Tickets", "Approvals", "Follow-ups", "Priorities"];
+const WORK_TABS = ["Tickets", "Approvals", "Follow-ups", "Priorities"] as const;
+type WorkTab = (typeof WORK_TABS)[number];
 
 function useNow() {
   const [now, setNow] = useState<Date | null>(null);
@@ -95,7 +96,7 @@ function Dashboard() {
   const [picksOpen, setPicksOpen] = useState(false);
   const [news, setNews] = useState<string[]>(DEFAULT_NEWS);
   const [newSource, setNewSource] = useState("");
-  const [workTab, setWorkTab] = useState(WORK_TABS[0]);
+  const [workTab, setWorkTab] = useState<WorkTab>("Tickets");
   const hour = now?.getHours() ?? 9;
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
@@ -104,7 +105,9 @@ function Dashboard() {
       const j = i + d;
       if (j < 0 || j >= n.length) return n;
       const c = [...n];
-      [c[i], c[j]] = [c[j], c[i]];
+      const a = c[i]!;
+      c[i] = c[j]!;
+      c[j] = a;
       return c;
     });
 
@@ -254,7 +257,7 @@ function Dashboard() {
               { title: "Security monitoring", icon: ShieldCheck, text: "Posture, threats and incidents.", to: ["security", "security-overview", "security-posture"] },
               { title: "Knowledge base", icon: BookOpen, text: "Guides, walkthroughs and training.", to: ["knowledge-and-learning", "getting-started", "getting-started-with-your-command-center"] },
             ].map((c) => (
-              <Link key={c.title} to="/m/$section/$group/$page" params={{ section: c.to[0], group: c.to[1], page: c.to[2] }} className="group rounded-xl border bg-card p-4 shadow-card hover:border-primary/50">
+              <Link key={c.title} to="/m/$section/$group/$page" params={{ section: c.to[0]!, group: c.to[1]!, page: c.to[2]! }} className="group rounded-xl border bg-card p-4 shadow-card hover:border-primary/50">
                 <div className="mb-1 flex items-center gap-2">
                   <c.icon className="size-4 text-primary" />
                   <h3 className="flex-1 text-sm font-semibold">{c.title}</h3>

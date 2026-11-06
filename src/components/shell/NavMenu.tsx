@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ChevronRight, Home } from "lucide-react";
+import { ChevronRight, Home, LayoutGrid } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -44,7 +44,7 @@ export function NavMenu({ open, onOpenChange }: { open: boolean; onOpenChange: (
             </Link>
             <ul className="space-y-1">
               {NAV.map((section) => {
-                const Icon = SECTION_ICONS[section.slug];
+                const Icon = SECTION_ICONS[section.slug] ?? LayoutGrid;
                 const expanded = openSection === section.slug;
                 const isCurrent = curSection === section.slug;
                 return (

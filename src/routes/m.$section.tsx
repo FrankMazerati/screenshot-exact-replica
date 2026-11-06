@@ -1,4 +1,5 @@
 import { Link, Outlet, createFileRoute, notFound, useMatches } from "@tanstack/react-router";
+import { LayoutGrid } from "lucide-react";
 
 import { StatusBadge } from "@/components/shell/StatusBadge";
 import { SECTION_ICONS } from "@/components/shell/section-icons";
@@ -28,7 +29,7 @@ function SectionLayout() {
   const isLeaf = useMatches({ select: (m) => m.some((x) => x.routeId === "/m/$section/$group/$page") });
   if (isLeaf) return <Outlet />;
   const section = findSection(slug)!;
-  const Icon = SECTION_ICONS[section.slug];
+  const Icon = SECTION_ICONS[section.slug] ?? LayoutGrid;
 
   return (
     <div className="space-y-5">

@@ -10,33 +10,52 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MSectionRouteImport } from './routes/m.$section'
+import { Route as MSectionGroupPageRouteImport } from './routes/m.$section.$group.$page'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MSectionRoute = MSectionRouteImport.update({
+  id: '/m/$section',
+  path: '/m/$section',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MSectionGroupPageRoute = MSectionGroupPageRouteImport.update({
+  id: '/$group/$page',
+  path: '/$group/$page',
+  getParentRoute: () => MSectionRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/m/$section': typeof MSectionRouteWithChildren
+  '/m/$section/$group/$page': typeof MSectionGroupPageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/m/$section': typeof MSectionRouteWithChildren
+  '/m/$section/$group/$page': typeof MSectionGroupPageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/m/$section': typeof MSectionRouteWithChildren
+  '/m/$section/$group/$page': typeof MSectionGroupPageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/m/$section' | '/m/$section/$group/$page'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/m/$section' | '/m/$section/$group/$page'
+  id: '__root__' | '/' | '/m/$section' | '/m/$section/$group/$page'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  MSectionRoute: typeof MSectionRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +67,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/m/$section': {
+      id: '/m/$section'
+      path: '/m/$section'
+      fullPath: '/m/$section'
+      preLoaderRoute: typeof MSectionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/m/$section/$group/$page': {
+      id: '/m/$section/$group/$page'
+      path: '/$group/$page'
+      fullPath: '/m/$section/$group/$page'
+      preLoaderRoute: typeof MSectionGroupPageRouteImport
+      parentRoute: typeof MSectionRoute
+    }
   }
 }
 
+interface MSectionRouteChildren {
+  MSectionGroupPageRoute: typeof MSectionGroupPageRoute
+}
+
+const MSectionRouteChildren: MSectionRouteChildren = {
+  MSectionGroupPageRoute: MSectionGroupPageRoute,
+}
+
+const MSectionRouteWithChildren = MSectionRoute._addFileChildren(
+  MSectionRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  MSectionRoute: MSectionRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,24 +1,25 @@
 /**
- * IntelliSync core engine — pure, framework-agnostic logic.
- * Persistence lives in ./client.ts; this file has no I/O so it is portable and testable.
- *
- * Layers:
- *  - IntelliSync: this engine (events, retry, reconciliation, health).
- *  - MySync: employee-facing view over a user's own connections/events.
- *  - Company Sync: admin-facing management of all connections.
- *  - Central Authorization: decides who may emit/handle events (see canEmit).
+ * IntelliSync core engine: pure, framework-agnostic event and retry logic.
+ * Persistence and authorization enforcement belong in trusted server-side services.
  */
 
 export type ConnectionStatus = "not_connected" | "healthy" | "degraded" | "failed";
 export type EventStatus = "pending" | "processing" | "succeeded" | "failed" | "dead";
 
 export const SYNC_EVENT_TYPES = [
-  "user.created", "user.updated", "user.offboarded",
-  "device.assigned", "device.unassigned",
-  "group.membership_changed", "role.changed",
-  "license.assigned", "license.revoked",
-  "ticket.created", "ticket.updated",
+  "user.created",
+  "user.updated",
+  "user.offboarded",
+  "device.assigned",
+  "device.unassigned",
+  "group.membership_changed",
+  "role.changed",
+  "license.assigned",
+  "license.revoked",
+  "ticket.created",
+  "ticket.updated",
 ] as const;
+
 export type SyncEventType = (typeof SYNC_EVENT_TYPES)[ umber];
 
 export type SyncEvent = {
@@ -41,38 +42,42 @@ export function backoffMs(attempts: number): number {
 }
 
 /** State transition after a handler attempt. */
-export function nextState(ev: Pick&lt;SyncEvent, "attempts" | "max_attempts"&gt;, ok: boolean, now = Date.now()) {
-  const attempts = ev.attempts + 1;
-  if (ok) return { status: "succeeded" as const, attempts, next_attempt_at: new Date(now).toISOString() };
-  if (attempts >= ev.max_attempts) return { status: "dead" as const, attempts, next_attempt_at: new Date(now).toISOString() };
+export function nextState(
+  event: Pick&lt;SyncEvent, "attempts" | "max_attempts"&gt;,
+  succeeded: boolean,
+  now = Date.now(),
+) {
+  const attempts = event.attempts + 1;
+  if (succeeded) return { status: "succeeded" as const, attempts, next_attempt_at: new Date(now).toISOString() };
+  if (attempts &gt;= event.max_attempts) return { status: "dead" as const, attempts, next_attempt_at: new Date(now).toISOString() };
   return { status: "failed" as const, attempts, next_attempt_at: new Date(now + backoffMs(attempts)).toISOString() };
 }
 
-/** Health derived from recent event outcomes. */
+/** Derive connection health from recent event outcomes. */
 export function deriveHealth(recent: { status: EventStatus }[]): ConnectionStatus {
   if (recent.length === 0) return "not_connected";
-  const bad = recent.filter((e) => e.status === "failed" || e.status === "dead").length;
+  const bad = recent.filter((event) => event.status === "failed" || event.status === "dead").length;
   const ratio = bad / recent.length;
   if (ratio === 0) return "healthy";
   return ratio &lt; 0.25 ? "degraded" : "failed";
 }
 
-/** Events due for processing or retry. */
+/** Select pending or retryable events whose scheduled retry time has arrived. */
 export function dueEvents&lt;T extends Pick&lt;SyncEvent, "status" | "next_attempt_at"&gt;&gt;(events: T[], now = Date.now()): T[] {
-  return events.filter((e) => (e.status === "pending" || e.status === "failed") &amp;&amp; Date.parse(e.next_attempt_at) &lt;= now);
+  return events.filter((event) => (event.status === "pending" || event.status === "failed") &amp;&amp; Date.parse(event.next_attempt_at) &lt;= now);
 }
 
+/** UI/domain hint only, never an authorization boundary. Server-side permissions and RLS remain authoritative. */
 export type Role = "admin" | "it_staff" | "employee";
-/** Central Authorization hook: who may emit which events. */
 export function canEmit(roles: Role[], type: SyncEventType): boolean {
   if (roles.includes("admin")) return true;
   if (roles.includes("it_staff")) return !type.startsWith("role.");
   return type.startsWith("ticket.");
 }
 
-export type SyncHandler = (ev: SyncEvent) => Promise&lt;void&gt;;
-/** Module registry: modules register handlers per connection id. */
+export type SyncHandler = (event: SyncEvent) =&gt; Promise&lt;void&gt;;
+/** In-memory handler registry for local dispatch composition only. */
 export const handlers = new Map&lt;string, SyncHandler&gt;();
-export function registerHandler(connectionId: string, h: SyncHandler) {
-  handlers.set(connectionId, h);
+export function registerHandler(connectionId: string, handler: SyncHandler): void {
+  handlers.set(connectionId, handler);
 }

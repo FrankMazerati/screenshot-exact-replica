@@ -28,3 +28,8 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+- Navigation is data-driven from `src/lib/nav.ts`; every menu item resolves to `/m/$section/$group/$page`, so add pages by editing that data, not by adding route files. Why: one source keeps menu, search, breadcrumbs and routes in sync.
+- Cross-section working state (active ticket, Help Buddy, notes, checklist) lives in `WorkContextProvider` mounted in `__root.tsx` around the shell. Why: the ticket must stay the working context across navigation.
+- Ticket tools open as panels inside the ticket workspace (`src/components/workspace/TicketWorkspace.tsx`), never as navigation away. Why: core product requirement.
